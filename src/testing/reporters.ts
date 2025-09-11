@@ -1,4 +1,4 @@
-import { TestRunnerStats, TestResult } from './test-runner';
+import { TestRunnerStats, TestResult } from "./test-runner";
 
 export interface TestReporter {
   onStart(): void;
@@ -13,11 +13,11 @@ export interface TestReporter {
  * Console reporter for test results
  */
 export class ConsoleReporter implements TestReporter {
-  private currentSuite = '';
+  private currentSuite = "";
   private suiteStartTime = 0;
 
   onStart(): void {
-    console.log('Starting test run...\n');
+    console.log("Starting test run...\n");
   }
 
   onSuiteStart(suiteName: string): void {
@@ -36,33 +36,33 @@ export class ConsoleReporter implements TestReporter {
   }
 
   onTestEnd(result: TestResult): void {
-    const icon = result.passed ? '✓' : '✗';
-    const color = result.passed ? '\x1b[32m' : '\x1b[31m'; // Green or red
-    const reset = '\x1b[0m';
-    
+    const icon = result.passed ? "✓" : "✗";
+    const color = result.passed ? "\x1b[32m" : "\x1b[31m"; // Green or red
+    const reset = "\x1b[0m";
+
     let output = `  ${color}${icon}${reset} ${result.name}`;
-    
+
     if (result.duration > 100) {
       output += ` (${result.duration}ms)`;
     }
-    
+
     if (result.retries > 0) {
       output += ` (${result.retries} retries)`;
     }
-    
+
     console.log(output);
-    
+
     if (!result.passed && result.error) {
       console.log(`    ${result.error.message}`);
       if (result.error.stack) {
-        const stackLines = result.error.stack.split('\n').slice(1, 4);
-        stackLines.forEach(line => console.log(`    ${line.trim()}`));
+        const stackLines = result.error.stack.split("\n").slice(1, 4);
+        stackLines.forEach((line) => console.log(`    ${line.trim()}`));
       }
     }
   }
 
   onEnd(stats: TestRunnerStats): void {
-    console.log('\n' + '='.repeat(50));
+    console.log("\n" + "=".repeat(50));
     console.log(`Test Results:`);
     console.log(`  Suites: ${stats.suites}`);
     console.log(`  Tests:  ${stats.total}`);
@@ -70,7 +70,7 @@ export class ConsoleReporter implements TestReporter {
     console.log(`  Failed: ${stats.failed}`);
     console.log(`  Skipped: ${stats.skipped}`);
     console.log(`  Duration: ${stats.duration}ms`);
-    
+
     if (stats.failed > 0) {
       console.log(`\n❌ ${stats.failed} test(s) failed`);
     } else {
@@ -85,7 +85,7 @@ export class ConsoleReporter implements TestReporter {
 export class JSONReporter implements TestReporter {
   private results: any = {
     suites: [],
-    stats: null
+    stats: null,
   };
   private currentSuite: any = null;
 
@@ -93,7 +93,7 @@ export class JSONReporter implements TestReporter {
     this.results = {
       suites: [],
       stats: null,
-      startTime: new Date().toISOString()
+      startTime: new Date().toISOString(),
     };
   }
 
@@ -101,7 +101,7 @@ export class JSONReporter implements TestReporter {
     this.currentSuite = {
       name: suiteName,
       tests: [],
-      startTime: new Date().toISOString()
+      startTime: new Date().toISOString(),
     };
   }
 
@@ -125,10 +125,12 @@ export class JSONReporter implements TestReporter {
         duration: result.duration,
         skipped: result.skipped,
         retries: result.retries,
-        error: result.error ? {
-          message: result.error.message,
-          stack: result.error.stack
-        } : null
+        error: result.error
+          ? {
+              message: result.error.message,
+              stack: result.error.stack,
+            }
+          : null,
       });
     }
   }
@@ -148,8 +150,8 @@ export class JSONReporter implements TestReporter {
  * HTML reporter for test results
  */
 export class HTMLReporter implements TestReporter {
-  private html = '';
-  private currentSuite = '';
+  private html = "";
+  private currentSuite = "";
 
   onStart(): void {
     this.html = `
@@ -193,19 +195,25 @@ export class HTMLReporter implements TestReporter {
   }
 
   onTestEnd(result: TestResult): void {
-    const className = result.passed ? 'passed' : result.skipped ? 'skipped' : 'failed';
-    const icon = result.passed ? '✓' : result.skipped ? '○' : '✗';
-    
+    const className = result.passed
+      ? "passed"
+      : result.skipped
+      ? "skipped"
+      : "failed";
+    const icon = result.passed ? "✓" : result.skipped ? "○" : "✗";
+
     this.html += `        <div class="test ${className}">
             ${icon} ${this.escapeHtml(result.name)}
             <span class="duration">(${result.duration}ms)</span>
 `;
-    
+
     if (!result.passed && result.error) {
-      this.html += `            <div class="error">${this.escapeHtml(result.error.message)}</div>
+      this.html += `            <div class="error">${this.escapeHtml(
+        result.error.message
+      )}</div>
 `;
     }
-    
+
     this.html += `        </div>
 `;
   }
@@ -223,14 +231,17 @@ export class HTMLReporter implements TestReporter {
     </div>
 </body>
 </html>`;
-    
+
     console.log(this.html);
   }
 
   private escapeHtml(text: string): string {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   getHTML(): string {
@@ -249,27 +260,27 @@ export class MultiReporter implements TestReporter {
   }
 
   onStart(): void {
-    this.reporters.forEach(reporter => reporter.onStart());
+    this.reporters.forEach((reporter) => reporter.onStart());
   }
 
   onSuiteStart(suiteName: string): void {
-    this.reporters.forEach(reporter => reporter.onSuiteStart(suiteName));
+    this.reporters.forEach((reporter) => reporter.onSuiteStart(suiteName));
   }
 
   onSuiteEnd(suiteName: string): void {
-    this.reporters.forEach(reporter => reporter.onSuiteEnd(suiteName));
+    this.reporters.forEach((reporter) => reporter.onSuiteEnd(suiteName));
   }
 
   onTestStart(testName: string): void {
-    this.reporters.forEach(reporter => reporter.onTestStart(testName));
+    this.reporters.forEach((reporter) => reporter.onTestStart(testName));
   }
 
   onTestEnd(result: TestResult): void {
-    this.reporters.forEach(reporter => reporter.onTestEnd(result));
+    this.reporters.forEach((reporter) => reporter.onTestEnd(result));
   }
 
   onEnd(stats: TestRunnerStats): void {
-    this.reporters.forEach(reporter => reporter.onEnd(stats));
+    this.reporters.forEach((reporter) => reporter.onEnd(stats));
   }
 
   addReporter(reporter: TestReporter): void {
