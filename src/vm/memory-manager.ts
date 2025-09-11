@@ -232,7 +232,8 @@ export class MemoryManager {
     // Mark referenced objects (simplified - in a real implementation,
     // we'd traverse object properties and array elements)
     if (block.type === 'object' && typeof block.data === 'object') {
-      for (const value of Object.values(block.data)) {
+      for (const key in block.data) {
+        const value = block.data[key];
         if (typeof value === 'number' && this.memory[value]) {
           this.markReachable(value);
         }
@@ -335,7 +336,8 @@ export class MemoryManager {
     // Update references in compacted memory
     for (const block of compactedMemory) {
       if (block && block.type === 'object' && typeof block.data === 'object') {
-        for (const [key, value] of Object.entries(block.data)) {
+        for (const key in block.data) {
+          const value = block.data[key];
           if (typeof value === 'number' && addressMapping.has(value)) {
             block.data[key] = addressMapping.get(value);
           }
@@ -377,7 +379,7 @@ export class MemoryManager {
    */
   dumpMemory(): void {
     console.log('Memory Dump:');
-    console.log('='.repeat(40));
+    console.log('========================================');
     
     for (let i = 0; i < this.memory.length; i++) {
       const block = this.memory[i];

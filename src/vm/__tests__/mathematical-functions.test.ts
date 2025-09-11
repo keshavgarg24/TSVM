@@ -69,8 +69,9 @@ describe("VM Mathematical Functions", () => {
       });
 
       it("should handle very large numbers", () => {
+        const largeNumber = 9007199254740991; // Number.MAX_SAFE_INTEGER
         const instructions = [
-          factory.push(-Number.MAX_SAFE_INTEGER),
+          factory.push(-largeNumber),
           factory.call("abs"),
           factory.halt(),
         ];
@@ -78,7 +79,7 @@ describe("VM Mathematical Functions", () => {
         vm.execute(instructions);
         const state = vm.getState();
 
-        expect(state.stack[0]?.data).toBe(Number.MAX_SAFE_INTEGER);
+        expect(state.stack[0]?.data).toBe(largeNumber);
       });
 
       it("should handle very small numbers", () => {
@@ -446,8 +447,9 @@ describe("VM Mathematical Functions", () => {
       });
 
       it("should handle operations that result in infinity", () => {
+        const maxValue = 1.7976931348623157e+308; // Number.MAX_VALUE
         const instructions = [
-          factory.push(Number.MAX_VALUE),
+          factory.push(maxValue),
           factory.push(2),
           factory.call("pow"),
           factory.halt(),
@@ -681,14 +683,16 @@ describe("VM Mathematical Functions", () => {
     });
 
     it("should handle edge case numbers", () => {
+      const epsilon = 2.220446049250313e-16; // Number.EPSILON
+      const minValue = 5e-324; // Number.MIN_VALUE
       const testCases = [
-        { func: "abs", input: Number.EPSILON, expected: Number.EPSILON },
+        { func: "abs", input: epsilon, expected: epsilon },
         {
           func: "sqrt",
-          input: Number.MIN_VALUE,
-          expected: Math.sqrt(Number.MIN_VALUE),
+          input: minValue,
+          expected: Math.sqrt(minValue),
         },
-        { func: "abs", input: -Number.EPSILON, expected: Number.EPSILON },
+        { func: "abs", input: -epsilon, expected: epsilon },
       ];
 
       testCases.forEach(({ func, input, expected }) => {
@@ -703,7 +707,7 @@ describe("VM Mathematical Functions", () => {
         vm.execute(instructions);
         const state = vm.getState();
 
-        if (expected === Number.EPSILON) {
+        if (expected === epsilon) {
           expect(state.stack[0]?.data).toBeCloseTo(expected);
         } else {
           expect(state.stack[0]?.data).toBe(expected);

@@ -372,7 +372,14 @@ export function getInstructionInfo(opcode: OpCode) {
  * Gets all available opcodes
  */
 export function getAllOpcodes(): OpCode[] {
-  return Object.values(OpCode).filter(v => typeof v === 'number') as OpCode[];
+  const opcodes: OpCode[] = [];
+  for (const key in OpCode) {
+    const value = OpCode[key as keyof typeof OpCode];
+    if (typeof value === 'number') {
+      opcodes.push(value);
+    }
+  }
+  return opcodes;
 }
 
 /**
