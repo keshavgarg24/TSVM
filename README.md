@@ -47,7 +47,7 @@ npm run cli -- examples/calculator.ts
 npm run cli -- examples/fibonacci.ts
 ```
 
-## 🏗️ Architecture
+##  Architecture
 
 The TypeScript VM follows a traditional compiler architecture:
 
@@ -204,7 +204,7 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for deta
 Quick start for contributors:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/keshavgarg24/TSVM.git
 cd typescript-vm
 npm install
 npm run build
@@ -216,11 +216,7 @@ npm test
 - **CLI Documentation**: See [CLI.md](CLI.md) for detailed command-line usage
 - **Contributing Guide**: See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines
 - **Examples**: Check the `examples/` directory for sample programs
-- **Project Overview**: See [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) for architecture details
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 

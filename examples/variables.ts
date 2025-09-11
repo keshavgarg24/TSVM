@@ -7,14 +7,14 @@ function testScoping() {
   let localVar = "I'm local";
   print(globalVar);
   print(localVar);
-  
+
   // Nested scope
   {
     let nestedVar = "I'm nested";
     print(nestedVar);
     print(localVar); // Can access outer scope
   }
-  
+
   // nestedVar is not accessible here
   return localVar;
 }

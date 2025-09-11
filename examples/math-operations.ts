@@ -1,24 +1,24 @@
 /// <reference path="global.d.ts" />
 
 // Mathematical operations demonstration
-let a = 10;
-let b = 3;
+let mathA = 10;
+let mathB = 3;
 
 print("Basic arithmetic:");
-print("a = " + toString(a));
-print("b = " + toString(b));
-print("a + b = " + toString(a + b));
-print("a - b = " + toString(a - b));
-print("a * b = " + toString(a * b));
-print("a / b = " + toString(a / b));
-print("a % b = " + toString(a % b));
+print("mathA = " + toString(mathA));
+print("mathB = " + toString(mathB));
+print("mathA + mathB = " + toString(mathA + mathB));
+print("mathA - mathB = " + toString(mathA - mathB));
+print("mathA * mathB = " + toString(mathA * mathB));
+print("mathA / mathB = " + toString(mathA / mathB));
+print("mathA % mathB = " + toString(mathA % mathB));
 
 print("");
 print("Comparisons:");
-print("a > b: " + toString(a > b));
-print("a < b: " + toString(a < b));
-print("a == b: " + toString(a == b));
-print("a != b: " + toString(a != b));
+print("mathA > mathB: " + toString(mathA > mathB));
+print("mathA < mathB: " + toString(mathA < mathB));
+print("mathA == mathB: " + toString(mathA == mathB));
+print("mathA != mathB: " + toString(mathA != mathB));
 
 print("");
 print("Math functions:");
