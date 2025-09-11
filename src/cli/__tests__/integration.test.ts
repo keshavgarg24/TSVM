@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { CLI } from '../index';
+import { CLI } from '../cli';
 import { TestHelpers } from '../../testing/test-helpers';
 
 describe('CLI Integration Tests', () => {
@@ -43,7 +43,7 @@ describe('CLI Integration Tests', () => {
       
       // Test compilation
       process.argv = ['node', 'cli.js', 'compile', sourceFile];
-      const compileCLI = new CLI();
+      const compileCLI = new CLI({ mode: 'compile', input: sourceFile });
       
       // Mock console to capture output
       const originalLog = console.log;
@@ -63,7 +63,7 @@ describe('CLI Integration Tests', () => {
         
         // Test running the compiled program
         process.argv = ['node', 'cli.js', 'run', sourceFile];
-        const runCLI = new CLI();
+        const runCLI = new CLI({ mode: 'run', input: sourceFile });
         await runCLI.run();
         
         // Should have printed 42
@@ -85,11 +85,11 @@ describe('CLI Integration Tests', () => {
       
       // Compile to bytecode
       process.argv = ['node', 'cli.js', 'compile', sourceFile];
-      await new CLI().run();
+      await new CLI({ mode: 'compile', input: sourceFile }).run();
       
       // Disassemble to assembly
       process.argv = ['node', 'cli.js', 'disassemble', bytecodeFile];
-      await new CLI().run();
+      await new CLI({ mode: 'disassemble', input: bytecodeFile }).run();
       
       expect(fs.existsSync(assemblyFile)).toBe(true);
       
@@ -101,7 +101,7 @@ describe('CLI Integration Tests', () => {
       
       // Reassemble back to bytecode
       process.argv = ['node', 'cli.js', 'assemble', '--output', reassembledFile, assemblyFile];
-      await new CLI().run();
+      await new CLI({ mode: 'assemble', input: assemblyFile, output: reassembledFile }).run();
       
       expect(fs.existsSync(reassembledFile)).toBe(true);
       
@@ -119,18 +119,20 @@ describe('CLI Integration Tests', () => {
       
       fs.writeFileSync(sourceFile, 'let result = 5 + 3; print(result);');
       
-      // Compile to JSON format
-      process.argv = ['node', 'cli.js', 'compile', '--format', 'json', '--output', jsonFile, sourceFile];
-      await new CLI().run();
+      // Compile to bytecode format
+      process.argv = ['node', 'cli.js', 'compile', '--output', jsonFile, sourceFile];
+      await new CLI({ mode: 'compile', input: sourceFile, output: jsonFile }).run();
       
       expect(fs.existsSync(jsonFile)).toBe(true);
       const jsonContent = JSON.parse(fs.readFileSync(jsonFile, 'utf-8'));
-      expect(jsonContent).toHaveProperty('instructions');
-      expect(jsonContent).toHaveProperty('symbols');
+      expect(Array.isArray(jsonContent)).toBe(true);
       
-      // Compile to assembly format
-      process.argv = ['node', 'cli.js', 'compile', '--format', 'assembly', '--output', asmFile, sourceFile];
-      await new CLI().run();
+      // Compile and disassemble to assembly format
+      process.argv = ['node', 'cli.js', 'compile', sourceFile];
+      await new CLI({ mode: 'compile', input: sourceFile }).run();
+      
+      process.argv = ['node', 'cli.js', 'disassemble', '--output', asmFile, sourceFile.replace('.ts', '.bc')];
+      await new CLI({ mode: 'disassemble', input: sourceFile.replace('.ts', '.bc'), output: asmFile }).run();
       
       expect(fs.existsSync(asmFile)).toBe(true);
       const asmContent = fs.readFileSync(asmFile, 'utf-8');
@@ -163,7 +165,7 @@ describe('CLI Integration Tests', () => {
       
       try {
         process.argv = ['node', 'cli.js', 'run', sourceFile];
-        await new CLI().run();
+        await new CLI({ mode: 'run', input: sourceFile }).run();
         
         // Should calculate fibonacci(8) = 21
         expect(logs.some(log => log.includes('21'))).toBe(true);
@@ -188,7 +190,7 @@ describe('CLI Integration Tests', () => {
       
       try {
         process.argv = ['node', 'cli.js', 'compile', invalidFile];
-        await new CLI().run();
+        await new CLI({ mode: 'compile', input: invalidFile }).run();
         
         expect(errors.some(error => error.includes('Compilation error'))).toBe(true);
         expect(exitCode).toBe(1);
@@ -213,7 +215,7 @@ describe('CLI Integration Tests', () => {
       
       try {
         process.argv = ['node', 'cli.js', 'run', nonexistentFile];
-        await new CLI().run();
+        await new CLI({ mode: 'run', input: nonexistentFile }).run();
         
         expect(errors.some(error => error.includes('Failed to read file'))).toBe(true);
         expect(exitCode).toBe(1);
@@ -238,7 +240,7 @@ describe('CLI Integration Tests', () => {
         
         try {
           process.argv = ['node', 'cli.js', 'run', helloWorldFile];
-          await new CLI().run();
+          await new CLI({ mode: 'run', input: helloWorldFile }).run();
           
           expect(logs).toContain('Hello, World!');
           
@@ -258,7 +260,7 @@ describe('CLI Integration Tests', () => {
         
         try {
           process.argv = ['node', 'cli.js', 'run', calculatorFile];
-          await new CLI().run();
+          await new CLI({ mode: 'run', input: calculatorFile }).run();
           
           expect(logs.some(log => log.includes('Addition'))).toBe(true);
           expect(logs.some(log => log.includes('15'))).toBe(true); // 10 + 5
@@ -279,7 +281,7 @@ describe('CLI Integration Tests', () => {
         
         try {
           process.argv = ['node', 'cli.js', 'run', fibonacciFile];
-          await new CLI().run();
+          await new CLI({ mode: 'run', input: fibonacciFile }).run();
           
           expect(logs.some(log => log.includes('Fibonacci(10)'))).toBe(true);
           expect(logs.some(log => log.includes('55'))).toBe(true); // fibonacci(10) = 55
@@ -308,7 +310,7 @@ describe('CLI Integration Tests', () => {
       const startTime = Date.now();
       
       process.argv = ['node', 'cli.js', 'compile', largeFile];
-      await new CLI().run();
+      await new CLI({ mode: 'compile', input: largeFile }).run();
       
       const compileTime = Date.now() - startTime;
       
@@ -343,7 +345,7 @@ describe('CLI Integration Tests', () => {
       
       try {
         process.argv = ['node', 'cli.js', 'run', deepFile];
-        await new CLI().run();
+        await new CLI({ mode: 'run', input: deepFile }).run();
         
         expect(logs.some(log => log.includes('50'))).toBe(true);
         

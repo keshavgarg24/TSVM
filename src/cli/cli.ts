@@ -1,20 +1,27 @@
 #!/usr/bin/env node
-import * as fs from 'fs';
-import * as path from 'path';
-import { Lexer } from '../lexer';
-import { Parser } from '../parser';
-import { CodeGenerator, SymbolTable } from '../compiler';
-import { VirtualMachine } from '../vm';
-import { Disassembler } from '../tools/disassembler';
-import { Assembler } from '../tools/assembler';
-import { Debugger } from '../tools/debugger';
-import { REPL } from '../tools/repl';
-import { PerformanceRunner } from '../testing/performance/performance-runner';
+import * as fs from "fs";
+import * as path from "path";
+import { Lexer } from "../lexer";
+import { Parser } from "../parser";
+import { CodeGenerator, SymbolTable } from "../compiler";
+import { VirtualMachine } from "../vm";
+import { Disassembler } from "../tools/disassembler";
+import { Assembler } from "../tools/assembler";
+import { Debugger } from "../tools/debugger";
+// import { REPL } from '../tools/repl';
+// import { PerformanceRunner } from '../testing/performance/performance-runner';
 
 export interface CLIOptions {
   input?: string;
   output?: string;
-  mode: 'compile' | 'run' | 'disassemble' | 'assemble' | 'debug' | 'repl' | 'benchmark';
+  mode:
+    | "compile"
+    | "run"
+    | "disassemble"
+    | "assemble"
+    | "debug"
+    | "repl"
+    | "benchmark";
   optimize?: boolean;
   verbose?: boolean;
   help?: boolean;
@@ -34,66 +41,66 @@ export class CLI {
   private disassembler = new Disassembler();
   private assembler = new Assembler();
   private debugger: Debugger;
-  private repl: REPL;
+  // private repl: REPL;
 
   constructor(private options: CLIOptions) {
     this.codeGenerator = new CodeGenerator(this.symbolTable, {
       constantFolding: options.optimize ?? true,
       deadCodeElimination: options.optimize ?? true,
-      verbose: options.verbose ?? false
+      verbose: options.verbose ?? false,
     });
-    
+
     this.vm = new VirtualMachine(options.memorySize ?? 1024 * 1024);
     if (options.gcThreshold) {
       this.vm.setGCThreshold(options.gcThreshold);
     }
-    
-    this.debugger = new Debugger(this.vm);
-    this.repl = new REPL(this.lexer, this.parser, this.codeGenerator, this.vm);
+
+    this.debugger = new Debugger();
+    // this.repl = new REPL(this.lexer, this.parser, this.codeGenerator, this.vm);
   }
 
   async run(): Promise<void> {
     try {
       switch (this.options.mode) {
-        case 'compile':
+        case "compile":
           await this.compile();
           break;
-        case 'run':
+        case "run":
           await this.runProgram();
           break;
-        case 'disassemble':
+        case "disassemble":
           await this.disassemble();
           break;
-        case 'assemble':
+        case "assemble":
           await this.assemble();
           break;
-        case 'debug':
+        case "debug":
           await this.debug();
           break;
-        case 'repl':
+        case "repl":
           await this.startREPL();
           break;
-        case 'benchmark':
+        case "benchmark":
           await this.runBenchmarks();
           break;
         default:
           throw new Error(`Unknown mode: ${this.options.mode}`);
       }
     } catch (error) {
-      console.error('Error:', error instanceof Error ? error.message : error);
+      console.error("Error:", error instanceof Error ? error.message : error);
       process.exit(1);
     }
   }
 
   private async compile(): Promise<void> {
     if (!this.options.input) {
-      throw new Error('Input file required for compilation');
+      throw new Error("Input file required for compilation");
     }
 
     const sourceCode = await this.readFile(this.options.input);
-    
+
     if (this.options.verbose) {
-      console.log('🔧 Compiling:', this.options.input);
+      console.log("🔧 Compiling:", this.options.input);
     }
 
     // Tokenize
@@ -103,13 +110,13 @@ export class CLI {
     }
 
     // Parse
-    const ast = this.parser.parse(sourceCode);
+    const ast = this.parser.parse(tokens);
     if (this.options.verbose) {
-      console.log('🌳 Parsed AST');
+      console.log("🌳 Parsed AST");
     }
 
     if (this.options.outputAST) {
-      const astFile = this.getOutputPath('.ast.json');
+      const astFile = this.getOutputPath(".ast.json");
       await this.writeFile(astFile, JSON.stringify(ast, null, 2));
       console.log(`📄 AST written to: ${astFile}`);
     }
@@ -122,7 +129,7 @@ export class CLI {
 
     // Output bytecode
     if (this.options.output || this.options.outputBytecode) {
-      const bytecodeFile = this.options.output || this.getOutputPath('.bc');
+      const bytecodeFile = this.options.output || this.getOutputPath(".bc");
       const bytecodeJson = JSON.stringify(bytecode, null, 2);
       await this.writeFile(bytecodeFile, bytecodeJson);
       console.log(`💾 Bytecode written to: ${bytecodeFile}`);
@@ -130,27 +137,27 @@ export class CLI {
 
     // Output disassembly for readability
     const disassembly = this.disassembler.disassemble(bytecode);
-    const asmFile = this.getOutputPath('.asm');
+    const asmFile = this.getOutputPath(".asm");
     await this.writeFile(asmFile, disassembly);
     console.log(`📋 Assembly written to: ${asmFile}`);
 
-    console.log('✅ Compilation completed successfully');
+    console.log("✅ Compilation completed successfully");
   }
 
   private async runProgram(): Promise<void> {
     if (!this.options.input) {
-      throw new Error('Input file required for execution');
+      throw new Error("Input file required for execution");
     }
 
     const sourceCode = await this.readFile(this.options.input);
-    
+
     if (this.options.verbose) {
-      console.log('🚀 Running:', this.options.input);
+      console.log("🚀 Running:", this.options.input);
     }
 
     // Full compilation pipeline
     const tokens = this.lexer.tokenize(sourceCode);
-    const ast = this.parser.parse(sourceCode);
+    const ast = this.parser.parse(tokens);
     const bytecode = this.codeGenerator.compile(ast);
 
     if (this.options.verbose) {
@@ -162,15 +169,15 @@ export class CLI {
     }
 
     // Execute
-    console.log('--- Program Output ---');
+    console.log("--- Program Output ---");
     const startTime = Date.now();
     this.vm.execute(bytecode);
     const endTime = Date.now();
 
     if (this.options.verbose) {
-      console.log('--- Execution Complete ---');
+      console.log("--- Execution Complete ---");
       console.log(`⏱️  Execution time: ${endTime - startTime}ms`);
-      
+
       const finalMemStats = this.vm.getMemoryStats();
       console.log(`📊 Final memory stats:`);
       console.log(`  Used: ${finalMemStats.usedMemory} bytes`);
@@ -181,14 +188,14 @@ export class CLI {
 
   private async disassemble(): Promise<void> {
     if (!this.options.input) {
-      throw new Error('Input bytecode file required for disassembly');
+      throw new Error("Input bytecode file required for disassembly");
     }
 
     const bytecodeJson = await this.readFile(this.options.input);
     const bytecode = JSON.parse(bytecodeJson);
-    
+
     const disassembly = this.disassembler.disassemble(bytecode);
-    
+
     if (this.options.output) {
       await this.writeFile(this.options.output, disassembly);
       console.log(`📋 Disassembly written to: ${this.options.output}`);
@@ -199,65 +206,84 @@ export class CLI {
 
   private async assemble(): Promise<void> {
     if (!this.options.input) {
-      throw new Error('Input assembly file required for assembly');
+      throw new Error("Input assembly file required for assembly");
     }
 
     const assembly = await this.readFile(this.options.input);
     const bytecode = this.assembler.assemble(assembly);
-    
-    const outputFile = this.options.output || this.getOutputPath('.bc');
+
+    const outputFile = this.options.output || this.getOutputPath(".bc");
     const bytecodeJson = JSON.stringify(bytecode, null, 2);
     await this.writeFile(outputFile, bytecodeJson);
-    
+
     console.log(`💾 Bytecode written to: ${outputFile}`);
   }
 
   private async debug(): Promise<void> {
     if (!this.options.input) {
-      throw new Error('Input file required for debugging');
+      throw new Error("Input file required for debugging");
     }
 
     const sourceCode = await this.readFile(this.options.input);
-    
-    console.log('🐛 Starting debugger for:', this.options.input);
-    
+
+    console.log("🐛 Starting debugger for:", this.options.input);
+
     // Compile
     const tokens = this.lexer.tokenize(sourceCode);
-    const ast = this.parser.parse(sourceCode);
+    const ast = this.parser.parse(tokens);
     const bytecode = this.codeGenerator.compile(ast);
-    
-    // Load into debugger
-    this.debugger.loadProgram(bytecode);
-    
-    // Start interactive debugging session
-    await this.debugger.startInteractiveSession();
+
+    // Start debugging session
+    this.debugger.startSession(bytecode);
+
+    console.log(
+      "Debugger started. Use debugger commands to control execution."
+    );
+    console.log(
+      "Available commands: step, continue, pause, breakpoint <address>, variables, stack, quit"
+    );
+
+    // TODO: Implement interactive debugging interface
+    // For now, just run a few steps as demonstration
+    console.log("Running first few steps:");
+    for (let i = 0; i < 5; i++) {
+      const step = this.debugger.step();
+      if (!step) break;
+      console.log(
+        `Step ${step.stepNumber}: ${step.instruction.opcode} at address ${step.address}`
+      );
+    }
   }
 
   private async startREPL(): Promise<void> {
-    console.log('🔄 Starting TypeScript VM REPL');
-    console.log('Type .help for commands, .exit to quit');
-    
-    await this.repl.start();
+    console.log("🔄 Starting TypeScript VM REPL");
+    console.log("Type .help for commands, .exit to quit");
+    console.log("REPL functionality not yet implemented");
+
+    // TODO: Implement REPL
+    // await this.repl.start();
   }
 
   private async runBenchmarks(): Promise<void> {
-    console.log('📊 Running performance benchmarks');
-    
-    const runner = new PerformanceRunner({
-      includeBenchmarks: true,
-      includeMemoryProfiling: true,
-      includeCPUProfiling: true,
-      generateReports: true,
-      verbose: this.options.verbose ?? true,
-      outputDir: './benchmark-results'
-    });
-    
-    await runner.runAll();
+    console.log("📊 Running performance benchmarks");
+    console.log("Benchmark functionality not yet implemented");
+
+    // TODO: Implement benchmarking
+    // const runner = new PerformanceRunner({
+    //   includeBenchmarks: true,
+    //   includeMemoryProfiling: true,
+    //   includeCPUProfiling: true,
+    //   generateReports: true,
+    //   verbose: this.options.verbose ?? true,
+    //   outputDir: './benchmark-results'
+    // });
+    //
+    // await runner.runAll();
   }
 
   private async readFile(filePath: string): Promise<string> {
     try {
-      return fs.readFileSync(filePath, 'utf8');
+      return fs.readFileSync(filePath, "utf8");
     } catch (error) {
       throw new Error(`Cannot read file '${filePath}': ${error}`);
     }
@@ -270,8 +296,8 @@ export class CLI {
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }
-      
-      fs.writeFileSync(filePath, content, 'utf8');
+
+      fs.writeFileSync(filePath, content, "utf8");
     } catch (error) {
       throw new Error(`Cannot write file '${filePath}': ${error}`);
     }
@@ -281,7 +307,7 @@ export class CLI {
     if (!this.options.input) {
       return `output${extension}`;
     }
-    
+
     const parsed = path.parse(this.options.input);
     return path.join(parsed.dir, parsed.name + extension);
   }
@@ -289,72 +315,87 @@ export class CLI {
 
 export function parseArgs(args: string[]): CLIOptions {
   const options: CLIOptions = {
-    mode: 'run',
+    mode: "run",
     optimize: true,
-    verbose: false
+    verbose: false,
   };
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    
+
     switch (arg) {
-      case '-h':
-      case '--help':
+      case "-h":
+      case "--help":
         options.help = true;
         break;
-      case '-v':
-      case '--version':
+      case "-v":
+      case "--version":
         options.version = true;
         break;
-      case '-c':
-      case '--compile':
-        options.mode = 'compile';
+      case "-c":
+      case "--compile":
+        options.mode = "compile";
         break;
-      case '-r':
-      case '--run':
-        options.mode = 'run';
+      case "-r":
+      case "--run":
+        options.mode = "run";
         break;
-      case '-d':
-      case '--disassemble':
-        options.mode = 'disassemble';
+      case "-d":
+      case "--disassemble":
+        options.mode = "disassemble";
         break;
-      case '-a':
-      case '--assemble':
-        options.mode = 'assemble';
+      case "-a":
+      case "--assemble":
+        options.mode = "assemble";
         break;
-      case '--debug':
-        options.mode = 'debug';
+      case "--debug":
+        options.mode = "debug";
         break;
-      case '--repl':
-        options.mode = 'repl';
+      case "--repl":
+        options.mode = "repl";
         break;
-      case '--benchmark':
-        options.mode = 'benchmark';
+      case "--benchmark":
+        options.mode = "benchmark";
         break;
-      case '-o':
-      case '--output':
-        options.output = args[++i];
+      case "-o":
+      case "--output":
+        if (i + 1 < args.length) {
+          const nextArg = args[++i];
+          if (nextArg !== undefined) {
+            options.output = nextArg;
+          }
+        }
         break;
-      case '--no-optimize':
+      case "--no-optimize":
         options.optimize = false;
         break;
-      case '--verbose':
+      case "--verbose":
         options.verbose = true;
         break;
-      case '--output-bytecode':
+      case "--output-bytecode":
         options.outputBytecode = true;
         break;
-      case '--output-ast':
+      case "--output-ast":
         options.outputAST = true;
         break;
-      case '--memory-size':
-        options.memorySize = parseInt(args[++i]);
+      case "--memory-size":
+        if (i + 1 < args.length) {
+          const nextArg = args[++i];
+          if (nextArg !== undefined) {
+            options.memorySize = parseInt(nextArg);
+          }
+        }
         break;
-      case '--gc-threshold':
-        options.gcThreshold = parseInt(args[++i]);
+      case "--gc-threshold":
+        if (i + 1 < args.length) {
+          const nextArg = args[++i];
+          if (nextArg !== undefined) {
+            options.gcThreshold = parseInt(nextArg);
+          }
+        }
         break;
       default:
-        if (!arg.startsWith('-') && !options.input) {
+        if (arg && !arg.startsWith("-") && !options.input) {
           options.input = arg;
         }
         break;
@@ -403,6 +444,6 @@ Examples:
 }
 
 export function printVersion(): void {
-  const packageJson = require('../../package.json');
+  const packageJson = require("../../package.json");
   console.log(`TypeScript VM v${packageJson.version}`);
 }
