@@ -204,7 +204,7 @@ export class TypeScriptVMREPL extends REPL {
     this.write('\nCurrent variables:');
     this.write('==================');
     
-    for (const [name, value] of state.variables) {
+    for (const [name, value] of Array.from(state.variables.entries())) {
       this.write(`  ${name} = ${this.formatValue(value)}`);
     }
     this.write('');
