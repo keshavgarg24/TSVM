@@ -1,5 +1,5 @@
-import { Symbol, ValueType } from '../types';
-import { SymbolTable as SymbolTableInterface } from '../interfaces';
+import { Symbol, ValueType } from "../types";
+import { SymbolTable as SymbolTableInterface } from "../interfaces";
 
 export class SymbolTable implements SymbolTableInterface {
   private scopes: Map<string, Symbol>[] = [];
@@ -14,7 +14,7 @@ export class SymbolTable implements SymbolTableInterface {
     const symbol: Symbol = {
       name,
       type,
-      scope: this.currentScope
+      scope: this.currentScope,
     };
 
     // Add to current scope
@@ -152,12 +152,14 @@ export class SymbolTable implements SymbolTableInterface {
   /**
    * Get symbol information with additional metadata
    */
-  getSymbolInfo(name: string): {
-    symbol: Symbol;
-    scopeLevel: number;
-    isLocal: boolean;
-    isGlobal: boolean;
-  } | undefined {
+  getSymbolInfo(name: string):
+    | {
+        symbol: Symbol;
+        scopeLevel: number;
+        isLocal: boolean;
+        isGlobal: boolean;
+      }
+    | undefined {
     const symbol = this.lookup(name);
     if (!symbol) {
       return undefined;
@@ -168,7 +170,7 @@ export class SymbolTable implements SymbolTableInterface {
       symbol,
       scopeLevel,
       isLocal: scopeLevel > 0,
-      isGlobal: scopeLevel === 0
+      isGlobal: scopeLevel === 0,
     };
   }
 
@@ -180,7 +182,7 @@ export class SymbolTable implements SymbolTableInterface {
     scopes: { [scopeLevel: number]: Symbol[] };
   } {
     const scopesSnapshot: { [scopeLevel: number]: Symbol[] } = {};
-    
+
     for (let i = 0; i <= this.currentScope; i++) {
       const scope = this.scopes[i];
       if (scope) {
@@ -190,7 +192,7 @@ export class SymbolTable implements SymbolTableInterface {
 
     return {
       currentScope: this.currentScope,
-      scopes: scopesSnapshot
+      scopes: scopesSnapshot,
     };
   }
 
@@ -198,9 +200,9 @@ export class SymbolTable implements SymbolTableInterface {
    * Debug method to print symbol table state
    */
   debug(): void {
-    console.log('Symbol Table State:');
+    console.log("Symbol Table State:");
     console.log(`Current Scope: ${this.currentScope}`);
-    
+
     for (let i = 0; i <= this.currentScope; i++) {
       const scope = this.scopes[i];
       if (scope && scope.size > 0) {

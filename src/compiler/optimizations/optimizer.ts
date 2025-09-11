@@ -1,4 +1,4 @@
-import { ASTNode } from '../../ast/nodes';
+import { ASTNode } from '../../types';
 import { applyConstantFolding } from './constant-folding';
 import { applyDeadCodeElimination } from './dead-code-elimination';
 
@@ -140,59 +140,59 @@ export class Optimizer {
     switch (node.type) {
       case 'Program':
         if ('body' in node && Array.isArray(node.body)) {
-          count += node.body.reduce((sum, child) => sum + this.countNodes(child), 0);
+          count += node.body.reduce((sum: number, child: any) => sum + this.countNodes(child), 0);
         }
         break;
       case 'BlockStatement':
         if ('body' in node && Array.isArray(node.body)) {
-          count += node.body.reduce((sum, child) => sum + this.countNodes(child), 0);
+          count += node.body.reduce((sum: number, child: any) => sum + this.countNodes(child), 0);
         }
         break;
       case 'BinaryExpression':
-        if ('left' in node) count += this.countNodes(node.left);
-        if ('right' in node) count += this.countNodes(node.right);
+        if ('left' in node) count += this.countNodes((node as any).left);
+        if ('right' in node) count += this.countNodes((node as any).right);
         break;
       case 'UnaryExpression':
-        if ('operand' in node) count += this.countNodes(node.operand);
+        if ('operand' in node) count += this.countNodes((node as any).operand);
         break;
       case 'ExpressionStatement':
-        if ('expression' in node) count += this.countNodes(node.expression);
+        if ('expression' in node) count += this.countNodes((node as any).expression);
         break;
       case 'VariableDeclaration':
-        if ('init' in node && node.init) count += this.countNodes(node.init);
+        if ('initializer' in node && (node as any).initializer) count += this.countNodes((node as any).initializer);
         break;
       case 'AssignmentExpression':
-        if ('left' in node) count += this.countNodes(node.left);
-        if ('right' in node) count += this.countNodes(node.right);
+        if ('left' in node) count += this.countNodes((node as any).left);
+        if ('right' in node) count += this.countNodes((node as any).right);
         break;
       case 'CallExpression':
-        if ('callee' in node) count += this.countNodes(node.callee);
-        if ('arguments' in node && Array.isArray(node.arguments)) {
-          count += node.arguments.reduce((sum, arg) => sum + this.countNodes(arg), 0);
+        if ('callee' in node) count += this.countNodes((node as any).callee);
+        if ('arguments' in node && Array.isArray((node as any).arguments)) {
+          count += (node as any).arguments.reduce((sum: number, arg: any) => sum + this.countNodes(arg), 0);
         }
         break;
       case 'IfStatement':
-        if ('test' in node) count += this.countNodes(node.test);
-        if ('consequent' in node) count += this.countNodes(node.consequent);
-        if ('alternate' in node && node.alternate) count += this.countNodes(node.alternate);
+        if ('condition' in node) count += this.countNodes((node as any).condition);
+        if ('consequent' in node) count += this.countNodes((node as any).consequent);
+        if ('alternate' in node && (node as any).alternate) count += this.countNodes((node as any).alternate);
         break;
       case 'WhileStatement':
-        if ('test' in node) count += this.countNodes(node.test);
-        if ('body' in node) count += this.countNodes(node.body);
+        if ('condition' in node) count += this.countNodes((node as any).condition);
+        if ('body' in node) count += this.countNodes((node as any).body);
         break;
       case 'ForStatement':
-        if ('init' in node && node.init) count += this.countNodes(node.init);
-        if ('test' in node && node.test) count += this.countNodes(node.test);
-        if ('update' in node && node.update) count += this.countNodes(node.update);
-        if ('body' in node) count += this.countNodes(node.body);
+        if ('init' in node && (node as any).init) count += this.countNodes((node as any).init);
+        if ('test' in node && (node as any).test) count += this.countNodes((node as any).test);
+        if ('update' in node && (node as any).update) count += this.countNodes((node as any).update);
+        if ('body' in node) count += this.countNodes((node as any).body);
         break;
       case 'ReturnStatement':
-        if ('argument' in node && node.argument) count += this.countNodes(node.argument);
+        if ('argument' in node && (node as any).argument) count += this.countNodes((node as any).argument);
         break;
       case 'FunctionDeclaration':
-        if ('body' in node) count += this.countNodes(node.body);
-        if ('params' in node && Array.isArray(node.params)) {
-          count += node.params.reduce((sum, param) => sum + this.countNodes(param), 0);
+        if ('body' in node) count += this.countNodes((node as any).body);
+        if ('parameters' in node && Array.isArray((node as any).parameters)) {
+          count += (node as any).parameters.reduce((sum: number, param: any) => sum + this.countNodes(param), 0);
         }
         break;
     }
