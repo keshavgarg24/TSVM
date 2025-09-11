@@ -1,0 +1,13 @@
+[
+  {
+    "opcode": 1,
+    "operand": "Hello, World!"
+  },
+  {
+    "opcode": 50,
+    "operand": "print"
+  },
+  {
+    "opcode": 255
+  }
+]
