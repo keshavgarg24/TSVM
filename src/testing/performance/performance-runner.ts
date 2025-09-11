@@ -1,9 +1,31 @@
 #!/usr/bin/env node
-import { AdvancedBenchmarkSuite, DetailedBenchmarkResult } from './benchmark-suite';
-import { MemoryProfiler, MemoryBenchmarkResult } from './memory-profiler';
-import { CPUProfiler, CPUBenchmarkResult } from './cpu-profiler';
 import * as fs from 'fs';
 import * as path from 'path';
+
+// TODO: Implement these interfaces when the actual profiler modules are created
+export interface DetailedBenchmarkResult {
+  name: string;
+  operationsPerSecond: number;
+  averageDuration: number;
+  memoryUsage?: {
+    delta: number;
+  };
+}
+
+export interface MemoryBenchmarkResult {
+  name: string;
+  memoryEfficiency: number;
+  profile: {
+    leakDetected: boolean;
+    peakMemory: number;
+  };
+}
+
+export interface CPUBenchmarkResult {
+  name: string;
+  efficiency: number;
+  throughput: number;
+}
 
 export interface PerformanceRunnerOptions {
   includeBenchmarks?: boolean;
@@ -97,22 +119,19 @@ export class PerformanceRunner {
     // Run benchmarks
     if (this.options.includeBenchmarks) {
       console.log('\n📊 Running Performance Benchmarks...');
-      const benchmarkSuite = new AdvancedBenchmarkSuite();
-      results.benchmarks = await benchmarkSuite.runAll();
+      results.benchmarks = await this.runBenchmarkSuite();
     }
 
     // Run memory profiling
     if (this.options.includeMemoryProfiling) {
       console.log('\n🧠 Running Memory Profiling...');
-      const memoryProfiler = new MemoryProfiler();
-      results.memoryProfiles = await memoryProfiler.runMemoryBenchmarks();
+      results.memoryProfiles = await this.runMemoryProfiling();
     }
 
     // Run CPU profiling
     if (this.options.includeCPUProfiling) {
       console.log('\n⚡ Running CPU Profiling...');
-      const cpuProfiler = new CPUProfiler();
-      results.cpuProfiles = await cpuProfiler.runCPUBenchmarks();
+      results.cpuProfiles = await this.runCPUProfiling();
     }
 
     const endTime = Date.now();
@@ -415,6 +434,55 @@ export class PerformanceRunner {
   }
 
   /**
+   * Run benchmark suite (placeholder implementation)
+   */
+  private async runBenchmarkSuite(): Promise<DetailedBenchmarkResult[]> {
+    // TODO: Implement actual benchmark suite
+    console.log('⚠️  Benchmark suite not yet implemented');
+    return [
+      {
+        name: 'Sample Benchmark',
+        operationsPerSecond: 1000,
+        averageDuration: 1.0,
+        memoryUsage: { delta: 1024 }
+      }
+    ];
+  }
+
+  /**
+   * Run memory profiling (placeholder implementation)
+   */
+  private async runMemoryProfiling(): Promise<MemoryBenchmarkResult[]> {
+    // TODO: Implement actual memory profiler
+    console.log('⚠️  Memory profiler not yet implemented');
+    return [
+      {
+        name: 'Sample Memory Profile',
+        memoryEfficiency: 100,
+        profile: {
+          leakDetected: false,
+          peakMemory: 50 * 1024 * 1024
+        }
+      }
+    ];
+  }
+
+  /**
+   * Run CPU profiling (placeholder implementation)
+   */
+  private async runCPUProfiling(): Promise<CPUBenchmarkResult[]> {
+    // TODO: Implement actual CPU profiler
+    console.log('⚠️  CPU profiler not yet implemented');
+    return [
+      {
+        name: 'Sample CPU Profile',
+        efficiency: 50,
+        throughput: 1000
+      }
+    ];
+  }
+
+  /**
    * Compare with baseline results
    */
   private async compareWithBaseline(results: PerformanceResults): Promise<void> {
@@ -463,10 +531,20 @@ export async function main(): Promise<void> {
         options.includeCPUProfiling = false;
         break;
       case '--output':
-        options.outputDir = args[++i];
+        if (i + 1 < args.length) {
+          const nextArg = args[++i];
+          if (nextArg !== undefined) {
+            options.outputDir = nextArg;
+          }
+        }
         break;
       case '--baseline':
-        options.baselineFile = args[++i];
+        if (i + 1 < args.length) {
+          const nextArg = args[++i];
+          if (nextArg !== undefined) {
+            options.baselineFile = nextArg;
+          }
+        }
         break;
       case '--quiet':
         options.verbose = false;
