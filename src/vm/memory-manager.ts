@@ -57,8 +57,15 @@ export class MemoryManager {
     let address: number;
     if (freeIndex !== -1) {
       // Reuse existing block
-      address = this.freeList.splice(freeIndex, 1)[0];
+      const freedAddress = this.freeList.splice(freeIndex, 1)[0];
+      if (freedAddress === undefined) {
+        throw new Error('Failed to allocate memory: free list corruption');
+      }
+      address = freedAddress;
       const block = this.memory[address];
+      if (!block) {
+        throw new Error('Failed to allocate memory: invalid block reference');
+      }
       block.allocated = true;
       block.type = type;
       block.data = data;
@@ -199,7 +206,7 @@ export class MemoryManager {
     }
 
     // Mark from roots
-    for (const rootAddress of this.roots) {
+    for (const rootAddress of Array.from(this.roots)) {
       this.markReachable(rootAddress);
     }
 
@@ -338,7 +345,7 @@ export class MemoryManager {
 
     // Update roots
     const newRoots = new Set<number>();
-    for (const rootAddress of this.roots) {
+    for (const rootAddress of Array.from(this.roots)) {
       const newAddr = addressMapping.get(rootAddress);
       if (newAddr !== undefined) {
         newRoots.add(newAddr);
