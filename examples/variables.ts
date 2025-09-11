@@ -1,3 +1,5 @@
+/// <reference path="global.d.ts" />
+
 // Variable scoping examples
 let globalVar = "I'm global";
 

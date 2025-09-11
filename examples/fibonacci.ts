@@ -1,3 +1,5 @@
+/// <reference path="global.d.ts" />
+
 // Fibonacci sequence calculator
 function fibonacci(n) {
   if (n <= 1) {

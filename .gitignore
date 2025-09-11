@@ -41,7 +41,3 @@ pids
 # TypeScript cache
 *.tsbuildinfo
 
-# Kiro specs and documentation
-.kiro/
-PROJECT_SUMMARY.md
-*.md.backup

@@ -1,45 +1,37 @@
 # TypeScript VM CLI Documentation
 
-The TypeScript VM provides a comprehensive command-line interface for compiling, running, and debugging TypeScript-like programs.
+The TypeScript VM provides a command-line interface for compiling, running, and debugging TypeScript-like programs.
 
 ## Installation
 
+Clone and build from source:
 ```bash
-npm install -g typescript-vm
-```
-
-Or run from source:
-```bash
+git clone <repository-url>
+cd typescript-vm
 npm install
 npm run build
 ```
 
 ## Usage
 
-### Basic Syntax
-```bash
-tsvm [options] [file]
-```
+The CLI is accessed through npm scripts rather than a global command.
 
-## Modes
+## Available Commands
 
-### 1. Run Mode (Default)
+### 1. Run Mode
 Execute TypeScript-like source code directly:
 
 ```bash
 # Run a program
-tsvm program.ts
+npm run cli -- program.ts
 
-# Run with verbose output
-tsvm --verbose program.ts
-
-# Run with custom memory settings
-tsvm --memory-size 2048000 --gc-threshold 500 program.ts
+# Run with development mode
+npm run dev
 ```
 
 **Example:**
 ```bash
-tsvm examples/hello-world.ts
+npm run cli -- examples/hello-world.ts
 ```
 
 ### 2. Compile Mode
@@ -47,21 +39,12 @@ Compile source code to bytecode:
 
 ```bash
 # Compile to bytecode
-tsvm --compile program.ts
-
-# Compile with custom output
-tsvm -c program.ts -o program.bc
-
-# Compile with AST output
-tsvm -c program.ts --output-ast
-
-# Compile without optimizations
-tsvm -c program.ts --no-optimize
+npm run compile -- program.ts
 ```
 
 **Example:**
 ```bash
-tsvm -c examples/fibonacci.ts -o fibonacci.bc --verbose
+npm run compile -- examples/fibonacci.ts
 ```
 
 ### 3. Disassemble Mode
@@ -69,15 +52,7 @@ Convert bytecode back to human-readable assembly:
 
 ```bash
 # Disassemble bytecode
-tsvm --disassemble program.bc
-
-# Disassemble to file
-tsvm -d program.bc -o program.asm
-```
-
-**Example:**
-```bash
-tsvm -d fibonacci.bc -o fibonacci.asm
+npm run disassemble -- program.bc
 ```
 
 ### 4. Assemble Mode
@@ -85,10 +60,7 @@ Convert assembly code to bytecode:
 
 ```bash
 # Assemble to bytecode
-tsvm --assemble program.asm
-
-# Assemble with custom output
-tsvm -a program.asm -o program.bc
+npm run assemble -- program.asm
 ```
 
 ### 5. Debug Mode
@@ -96,121 +68,113 @@ Start interactive debugger:
 
 ```bash
 # Debug a program
-tsvm --debug program.ts
+npm run debug -- program.ts
 ```
-
-**Debugger Commands:**
-- `step` - Execute next instruction
-- `continue` - Continue execution
-- `break <address>` - Set breakpoint
-- `info stack` - Show stack contents
-- `info vars` - Show variables
-- `info memory` - Show memory statistics
-- `quit` - Exit debugger
 
 ### 6. REPL Mode
 Start interactive Read-Eval-Print Loop:
 
 ```bash
 # Start REPL
-tsvm --repl
+npm run repl
 ```
 
-**REPL Commands:**
-- `.help` - Show help
-- `.exit` - Exit REPL
-- `.clear` - Clear current context
-- `.save <file>` - Save session to file
-- `.load <file>` - Load session from file
-
-### 7. Benchmark Mode
-Run performance benchmarks:
+### 7. Testing and Benchmarks
+Run tests and performance analysis:
 
 ```bash
-# Run all benchmarks
-tsvm --benchmark
+# Run all tests
+npm test
 
-# Run with verbose output
-tsvm --benchmark --verbose
+# Run integration tests
+npm run test:integration
+
+# Run CLI tests
+npm run test:cli
+
+# Run performance benchmarks
+npm run benchmark
+
+# Run memory benchmarks
+npm run benchmark:memory
+
+# Run CPU benchmarks
+npm run benchmark:cpu
 ```
 
-## Options
+## Script Reference
 
-### Input/Output Options
-- `-o, --output <file>` - Specify output file path
-- `--output-bytecode` - Generate bytecode file (.bc)
-- `--output-ast` - Generate AST file (.ast.json)
-
-### Optimization Options
-- `--no-optimize` - Disable all optimizations
-- `--verbose` - Enable verbose output
-
-### Memory Options
-- `--memory-size <bytes>` - Set VM memory size (default: 1MB)
-- `--gc-threshold <n>` - Set garbage collection threshold (default: 1000)
-
-### Information Options
-- `-h, --help` - Show help information
-- `-v, --version` - Show version information
+| Script | Command | Description |
+|--------|---------|-------------|
+| Build | `npm run build` | Compile TypeScript to JavaScript |
+| Development | `npm run dev` | Run in development mode |
+| CLI | `npm run cli -- <file>` | Execute a program file |
+| Start | `npm start` | Alias for npm run cli |
+| REPL | `npm run repl` | Start interactive environment |
+| Debug | `npm run debug -- <file>` | Start debugger for a file |
+| Compile | `npm run compile -- <file>` | Compile to bytecode |
+| Disassemble | `npm run disassemble -- <file>` | Convert bytecode to assembly |
+| Assemble | `npm run assemble -- <file>` | Convert assembly to bytecode |
+| Demo | `npm run demo` | Run demonstration workflow |
 
 ## Examples
 
 ### Hello World
 ```bash
-# Create hello.ts
-echo 'print("Hello, World!");' > hello.ts
-
-# Run it
-tsvm hello.ts
+# Run the hello world example
+npm run cli -- examples/hello-world.ts
 ```
 
 ### Fibonacci Calculator
 ```bash
 # Run the fibonacci example
-tsvm examples/fibonacci.ts
+npm run cli -- examples/fibonacci.ts
 ```
 
-### Compile and Run Separately
+### Compile and Disassemble
 ```bash
-# Compile
-tsvm -c examples/math-operations.ts -o math.bc
+# Compile to bytecode
+npm run compile -- examples/math-operations.ts
 
-# Run bytecode (not directly supported, but you can disassemble and inspect)
-tsvm -d math.bc
+# Disassemble bytecode to inspect
+npm run disassemble -- examples/math-operations.bc
 ```
 
 ### Debug a Program
 ```bash
 # Start debugger
-tsvm --debug examples/control-flow.ts
-
-# In debugger:
-# > break 5
-# > continue
-# > info stack
-# > step
-# > quit
+npm run debug -- examples/control-flow.ts
 ```
 
 ### Performance Analysis
 ```bash
-# Run benchmarks
-tsvm --benchmark --verbose
+# Run all benchmarks
+npm run benchmark
 
-# The results will be saved to ./benchmark-results/
+# Run specific benchmark types
+npm run benchmark:memory
+npm run benchmark:cpu
+npm run benchmark:advanced
 ```
 
 ### REPL Session
 ```bash
 # Start REPL
-tsvm --repl
+npm run repl
+```
 
-# In REPL:
-# > let x = 42
-# > print(x)
-# > function add(a, b) { return a + b; }
-# > add(5, 3)
-# > .exit
+### Testing
+```bash
+# Run all tests
+npm test
+
+# Run specific test suites
+npm run test:integration
+npm run test:cli
+npm run test:performance
+
+# Run comprehensive test suite
+npm run test:all
 ```
 
 ## File Formats

@@ -1,3 +1,5 @@
+/// <reference path="global.d.ts" />
+
 // Simple calculator with variables
 let a = 10;
 let b = 5;
