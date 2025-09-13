@@ -628,7 +628,7 @@ describe('VM Control Flow and Function Call Execution', () => {
   describe('Performance and Edge Cases', () => {
     it('should handle maximum jump distance', () => {
       // Create a program with maximum valid jump
-      const instructions = [];
+      const instructions: any[] = [];
       for (let i = 0; i < 50; i++) {
         instructions.push(factory.push(i));
       }
@@ -655,7 +655,7 @@ describe('VM Control Flow and Function Call Execution', () => {
     it('should handle rapid function calls', () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
       
-      const instructions = [];
+      const instructions: any[] = [];
       for (let i = 0; i < 10; i++) {
         instructions.push(factory.push(`call_${i}`));
         instructions.push(factory.call('print'));
