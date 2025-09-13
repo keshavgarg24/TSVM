@@ -307,7 +307,7 @@ describe("VM Print Function and Basic I/O", () => {
 
     describe("Output Sequencing", () => {
       it("should handle rapid consecutive prints", () => {
-        const instructions = [];
+        const instructions: any[] = [];
 
         for (let i = 0; i < 10; i++) {
           instructions.push(factory.push(i));
@@ -345,7 +345,7 @@ describe("VM Print Function and Basic I/O", () => {
 
     describe("Output Buffer Management", () => {
       it("should handle large volume printing", () => {
-        const instructions = [];
+        const instructions: any[] = [];
 
         for (let i = 0; i < 100; i++) {
           instructions.push(factory.push(`Message ${i}`));
@@ -707,7 +707,7 @@ describe("VM Print Function and Basic I/O", () => {
 
   describe("Performance and Stress Testing", () => {
     it("should handle high-volume printing efficiently", () => {
-      const instructions = [];
+      const instructions: any[] = [];
 
       for (let i = 0; i < 1000; i++) {
         instructions.push(factory.push(`Message ${i}`));
@@ -740,7 +740,7 @@ describe("VM Print Function and Basic I/O", () => {
     });
 
     it("should handle mixed large content printing", () => {
-      const instructions = [];
+      const instructions: any[] = [];
 
       // Mix of different types and sizes
       for (let i = 0; i < 100; i++) {

@@ -20,14 +20,14 @@ export * from './interfaces';
 export * from './bytecode';
 
 // Utilities
-export * from './utils/errors';
+export { RuntimeError, CompileTimeError, VMError } from './utils/errors';
 export * from './utils/values';
 
 // Tools
 export { Disassembler } from './tools/disassembler';
 export { Assembler } from './tools/assembler';
 export { Debugger } from './tools/debugger';
-export { REPL } from './tools/repl';
+export { REPL } from './repl';
 
 // Testing and Performance
 export { TestHelpers } from './testing/test-helpers';
@@ -49,7 +49,7 @@ export class TypeScriptVM {
    */
   execute(sourceCode: string): void {
     const tokens = this.lexer.tokenize(sourceCode);
-    const ast = this.parser.parse(sourceCode);
+    const ast = this.parser.parse(tokens);
     const bytecode = this.codeGenerator.compile(ast);
     this.vm.execute(bytecode);
   }
@@ -59,7 +59,7 @@ export class TypeScriptVM {
    */
   compile(sourceCode: string) {
     const tokens = this.lexer.tokenize(sourceCode);
-    const ast = this.parser.parse(sourceCode);
+    const ast = this.parser.parse(tokens);
     const bytecode = this.codeGenerator.compile(ast);
     return {
       tokens,

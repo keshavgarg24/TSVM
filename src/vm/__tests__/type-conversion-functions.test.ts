@@ -628,7 +628,7 @@ describe('VM Type Conversion Functions', () => {
 
   describe('Performance and Edge Cases', () => {
     it('should handle rapid type conversion calls', () => {
-      const instructions = [];
+      const instructions: any[] = [];
       
       // Perform multiple conversions
       for (let i = 0; i < 10; i++) {

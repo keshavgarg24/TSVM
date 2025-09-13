@@ -674,7 +674,7 @@ describe('VM Variable Operations and Runtime Error Handling', () => {
       });
 
       it('should handle large numbers of variables', () => {
-        const instructions = [];
+        const instructions: any[] = [];
         
         // Create many variables
         for (let i = 0; i < 100; i++) {
@@ -922,7 +922,7 @@ describe('VM Variable Operations and Runtime Error Handling', () => {
 
   describe('Performance and Stress Testing', () => {
     it('should handle large variable operations efficiently', () => {
-      const instructions = [];
+      const instructions: any[] = [];
       
       // Create, modify, and access many variables
       for (let i = 0; i < 50; i++) {
@@ -953,7 +953,7 @@ describe('VM Variable Operations and Runtime Error Handling', () => {
     it('should handle memory cleanup efficiently', () => {
       // Create many variables
       for (let i = 0; i < 5; i++) {
-        const instructions = [];
+        const instructions: any[] = [];
         for (let j = 0; j < 20; j++) {
           instructions.push(factory.push(j));
           instructions.push(factory.store(`temp_${j}`));
