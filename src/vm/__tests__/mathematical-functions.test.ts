@@ -1,6 +1,5 @@
 import { VirtualMachine } from "../vm";
 import { InstructionFactory } from "../../bytecode";
-import { OpCode } from "../../types";
 import { RuntimeError } from "../../utils/errors";
 
 describe("VM Mathematical Functions", () => {
@@ -661,7 +660,7 @@ describe("VM Mathematical Functions", () => {
 
   describe("Performance and Edge Cases", () => {
     it("should handle rapid math function calls", () => {
-      const instructions = [];
+      const instructions: any[] = [];
 
       for (let i = 1; i <= 10; i++) {
         instructions.push(factory.push(i));

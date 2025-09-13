@@ -742,7 +742,7 @@ describe('VM String Manipulation Functions', () => {
 
   describe('Performance and Edge Cases', () => {
     it('should handle rapid string function calls', () => {
-      const instructions = [];
+      const instructions: any[] = [];
       
       // Perform multiple string operations
       for (let i = 0; i < 10; i++) {

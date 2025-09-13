@@ -188,7 +188,7 @@ describe('MemoryManager', () => {
   describe('Memory Compaction', () => {
     it('should compact fragmented memory', () => {
       // Create fragmentation
-      const addresses = [];
+      const addresses: any[] = [];
       for (let i = 0; i < 10; i++) {
         addresses.push(memoryManager.allocate('number', i, 8));
       }
