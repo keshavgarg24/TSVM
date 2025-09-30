@@ -5,47 +5,6 @@ A virtual machine implementation for executing TypeScript-like code with a custo
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)]()
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)]()
 
-## Quick Start
-
-### Installation
-
-Clone and build from source:
-
-```bash
-git clone https://github.com/keshavgarg24/TSVM.git
-cd typescript-vm
-npm install
-npm run build
-```
-
-### Basic Usage
-
-```bash
-# Run a program
-npm run cli -- program.ts
-
-# Start interactive REPL
-npm run repl
-
-# Compile to bytecode
-npm run compile -- program.ts
-
-# Debug a program
-npm run debug -- program.ts
-```
-
-### Hello World Example
-
-See the `examples/` directory for sample programs:
-
-```bash
-# Run the hello world example
-npm run cli -- examples/hello-world.ts
-
-# Try other examples
-npm run cli -- examples/calculator.ts
-npm run cli -- examples/fibonacci.ts
-```
 
 ##  Architecture
 
@@ -174,23 +133,6 @@ Available benchmark suites:
 - CPU profiling  
 - Advanced performance analysis
 
-##  Project Structure
-
-```
-src/
-├── ast/           # Abstract Syntax Tree nodes and utilities
-├── bytecode/      # Bytecode generation and operations
-├── cli/           # Command-line interface
-├── compiler/      # Compilation pipeline
-├── lexer/         # Tokenization and lexical analysis
-├── parser/        # Syntax parsing
-├── repl/          # Read-Eval-Print Loop
-├── runtime/       # Runtime environment and built-ins
-├── testing/       # Test utilities and benchmarks
-├── tools/         # Development and debugging tools
-├── vm/            # Virtual machine execution engine
-└── index.ts       # Main entry point
-```
 
 ## Contributing
 
