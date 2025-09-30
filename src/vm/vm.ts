@@ -272,17 +272,26 @@ export class VirtualMachine implements VMInterface {
   private executeAdd(): void {
     const { right, left } = this.popTwoOperands();
     
-    try {
-      const leftNum = toNumber(left);
-      const rightNum = toNumber(right);
-      const result = createValue(leftNum + rightNum);
+    // Check if either operand is a string - if so, do string concatenation
+    if (left.type === 'string' || right.type === 'string') {
+      const leftStr = toString(left);
+      const rightStr = toString(right);
+      const result = createValue(leftStr + rightStr);
       this.stack.push(result);
-    } catch (error) {
-      throw createTypeMismatchError(
-        'number',
-        `${left.type} and ${right.type}`,
-        'addition'
-      );
+    } else {
+      // Both operands are numbers - do numeric addition
+      try {
+        const leftNum = toNumber(left);
+        const rightNum = toNumber(right);
+        const result = createValue(leftNum + rightNum);
+        this.stack.push(result);
+      } catch (error) {
+        throw createTypeMismatchError(
+          'number',
+          `${left.type} and ${right.type}`,
+          'addition'
+        );
+      }
     }
   }
 
