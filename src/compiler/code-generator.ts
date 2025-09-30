@@ -315,6 +315,51 @@ export class CodeGenerator extends BaseASTVisitor<void> implements CodeGenerator
     this.instructions[jumpIfFalseIndex] = this.factory.jumpIfFalse(loopEndIndex);
   }
 
+  visitForStatement(node: any): void {
+    // Compile initialization (if present)
+    if (node.init) {
+      this.visit(node.init);
+    }
+    
+    // Mark the start of the loop condition check
+    const conditionStartIndex = this.instructions.length;
+    
+    // Compile condition (if present)
+    if (node.test) {
+      this.visit(node.test);
+      
+      // Reserve space for JUMP_IF_FALSE instruction (exit loop)
+      const jumpIfFalseIndex = this.instructions.length;
+      this.instructions.push(this.factory.jumpIfFalse(0)); // Placeholder address
+      
+      // Compile loop body
+      this.visit(node.body);
+      
+      // Compile update (if present)
+      if (node.update) {
+        this.visit(node.update);
+      }
+      
+      // Jump back to condition check
+      this.instructions.push(this.factory.jump(conditionStartIndex));
+      
+      // Update JUMP_IF_FALSE to point to end of loop
+      const loopEndIndex = this.instructions.length;
+      this.instructions[jumpIfFalseIndex] = this.factory.jumpIfFalse(loopEndIndex);
+    } else {
+      // No condition - infinite loop
+      this.visit(node.body);
+      
+      // Compile update (if present)
+      if (node.update) {
+        this.visit(node.update);
+      }
+      
+      // Jump back to start
+      this.instructions.push(this.factory.jump(conditionStartIndex));
+    }
+  }
+
   visitBlockStatement(node: any): void {
     // Enter new scope for block
     this.symbolTable.enterScope();

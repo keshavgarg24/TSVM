@@ -1,4 +1,16 @@
-import { ASTNode, NodeType, IfStatement, Literal, BlockStatement, Program } from '../../ast/nodes';
+import { 
+  ASTNode, 
+  NodeType,
+  IfStatement, 
+  WhileStatement,
+  VariableDeclaration,
+  Literal, 
+  BlockStatement, 
+  Program,
+  Statement,
+  Expression,
+  ForStatement
+} from '../../ast/nodes';
 
 /**
  * Dead code elimination optimization
@@ -57,11 +69,11 @@ export class DeadCodeEliminator {
 
       case NodeType.IfStatement:
         const ifStmt = node as IfStatement;
-        this.markReachableCode(ifStmt.test);
+        this.markReachableCode(ifStmt.condition);
         
         // Check if condition is a constant
-        if (ifStmt.test.type === NodeType.Literal) {
-          const literal = ifStmt.test as Literal;
+        if (ifStmt.condition.type === NodeType.Literal) {
+          const literal = ifStmt.condition as Literal;
           if (literal.value) {
             // Condition is truthy, only consequent is reachable
             this.markReachableCode(ifStmt.consequent);
@@ -79,39 +91,39 @@ export class DeadCodeEliminator {
         break;
 
       case NodeType.WhileStatement:
-        if ('test' in node) {
-          this.markReachableCode(node.test);
-          // Check if condition is a constant false
-          if (node.test.type === NodeType.Literal) {
-            const literal = node.test as Literal;
-            if (!literal.value) {
-              // Loop never executes
-              break;
-            }
+        const whileStmt = node as WhileStatement;
+        this.markReachableCode(whileStmt.condition);
+        // Check if condition is a constant false
+        if (whileStmt.condition.type === NodeType.Literal) {
+          const literal = whileStmt.condition as Literal;
+          if (!literal.value) {
+            // Loop never executes
+            break;
           }
-          this.markReachableCode(node.body);
         }
+        this.markReachableCode(whileStmt.body);
         break;
 
       case NodeType.ForStatement:
-        if ('init' in node && node.init) {
-          this.markReachableCode(node.init);
+        const forStmt = node as ForStatement;
+        if (forStmt.init) {
+          this.markReachableCode(forStmt.init);
         }
-        if ('test' in node && node.test) {
-          this.markReachableCode(node.test);
+        if (forStmt.test) {
+          this.markReachableCode(forStmt.test);
           // Check if condition is a constant false
-          if (node.test.type === NodeType.Literal) {
-            const literal = node.test as Literal;
+          if (forStmt.test.type === NodeType.Literal) {
+            const literal = forStmt.test as Literal;
             if (!literal.value) {
               // Loop never executes
               break;
             }
           }
         }
-        if ('update' in node && node.update) {
-          this.markReachableCode(node.update);
+        if (forStmt.update) {
+          this.markReachableCode(forStmt.update);
         }
-        this.markReachableCode(node.body);
+        this.markReachableCode(forStmt.body);
         break;
 
       default:
@@ -127,31 +139,31 @@ export class DeadCodeEliminator {
   private markChildrenReachable(node: ASTNode): void {
     switch (node.type) {
       case NodeType.BinaryExpression:
-        if ('left' in node) this.markReachableCode(node.left);
-        if ('right' in node) this.markReachableCode(node.right);
+        if ('left' in node) this.markReachableCode(node.left as Expression);
+        if ('right' in node) this.markReachableCode(node.right as Expression);
         break;
       case NodeType.UnaryExpression:
-        if ('operand' in node) this.markReachableCode(node.operand);
+        if ('operand' in node) this.markReachableCode(node.operand as Expression);
         break;
       case NodeType.ExpressionStatement:
-        if ('expression' in node) this.markReachableCode(node.expression);
+        if ('expression' in node) this.markReachableCode(node.expression as Expression);
         break;
       case NodeType.VariableDeclaration:
-        if ('init' in node && node.init) this.markReachableCode(node.init);
+        if ('initializer' in node && node.initializer) this.markReachableCode(node.initializer as Expression);
         break;
       case NodeType.AssignmentExpression:
-        if ('left' in node) this.markReachableCode(node.left);
-        if ('right' in node) this.markReachableCode(node.right);
+        if ('left' in node) this.markReachableCode(node.left as Expression);
+        if ('right' in node) this.markReachableCode(node.right as Expression);
         break;
       case NodeType.CallExpression:
-        if ('callee' in node) this.markReachableCode(node.callee);
+        if ('callee' in node) this.markReachableCode(node.callee as Expression);
         if ('arguments' in node && Array.isArray(node.arguments)) {
-          node.arguments.forEach(arg => this.markReachableCode(arg));
+          node.arguments.forEach((arg: Expression) => this.markReachableCode(arg));
         }
         break;
       case NodeType.ReturnStatement:
         if ('argument' in node && node.argument) {
-          this.markReachableCode(node.argument);
+          this.markReachableCode(node.argument as Expression);
         }
         break;
     }
@@ -180,55 +192,56 @@ export class DeadCodeEliminator {
     switch (node.type) {
       case NodeType.Program:
         if ('body' in node && Array.isArray(node.body)) {
-          node.body.forEach(child => this.collectUsedVariables(child));
+          node.body.forEach((child: Statement) => this.collectUsedVariables(child));
         }
         break;
       case NodeType.BlockStatement:
         if ('body' in node && Array.isArray(node.body)) {
-          node.body.forEach(child => this.collectUsedVariables(child));
+          node.body.forEach((child: Statement) => this.collectUsedVariables(child));
         }
         break;
       case NodeType.BinaryExpression:
-        if ('left' in node) this.collectUsedVariables(node.left);
-        if ('right' in node) this.collectUsedVariables(node.right);
+        if ('left' in node) this.collectUsedVariables(node.left as Expression);
+        if ('right' in node) this.collectUsedVariables(node.right as Expression);
         break;
       case NodeType.UnaryExpression:
-        if ('operand' in node) this.collectUsedVariables(node.operand);
+        if ('operand' in node) this.collectUsedVariables(node.operand as Expression);
         break;
       case NodeType.ExpressionStatement:
-        if ('expression' in node) this.collectUsedVariables(node.expression);
+        if ('expression' in node) this.collectUsedVariables(node.expression as Expression);
         break;
       case NodeType.VariableDeclaration:
-        if ('init' in node && node.init) this.collectUsedVariables(node.init);
+        if ('initializer' in node && node.initializer) this.collectUsedVariables(node.initializer as Expression);
         break;
       case NodeType.AssignmentExpression:
-        if ('left' in node) this.collectUsedVariables(node.left);
-        if ('right' in node) this.collectUsedVariables(node.right);
+        if ('left' in node) this.collectUsedVariables(node.left as Expression);
+        if ('right' in node) this.collectUsedVariables(node.right as Expression);
         break;
       case NodeType.CallExpression:
-        if ('callee' in node) this.collectUsedVariables(node.callee);
+        if ('callee' in node) this.collectUsedVariables(node.callee as Expression);
         if ('arguments' in node && Array.isArray(node.arguments)) {
-          node.arguments.forEach(arg => this.collectUsedVariables(arg));
+          node.arguments.forEach((arg: Expression) => this.collectUsedVariables(arg));
         }
         break;
       case NodeType.IfStatement:
-        if ('test' in node) this.collectUsedVariables(node.test);
-        if ('consequent' in node) this.collectUsedVariables(node.consequent);
-        if ('alternate' in node && node.alternate) this.collectUsedVariables(node.alternate);
+        if ('condition' in node) this.collectUsedVariables(node.condition as Expression);
+        if ('consequent' in node) this.collectUsedVariables(node.consequent as Statement);
+        if ('alternate' in node && node.alternate) this.collectUsedVariables(node.alternate as Statement);
         break;
       case NodeType.WhileStatement:
-        if ('test' in node) this.collectUsedVariables(node.test);
-        if ('body' in node) this.collectUsedVariables(node.body);
+        if ('condition' in node) this.collectUsedVariables(node.condition as Expression);
+        if ('body' in node) this.collectUsedVariables(node.body as Statement);
         break;
       case NodeType.ForStatement:
-        if ('init' in node && node.init) this.collectUsedVariables(node.init);
-        if ('test' in node && node.test) this.collectUsedVariables(node.test);
-        if ('update' in node && node.update) this.collectUsedVariables(node.update);
-        if ('body' in node) this.collectUsedVariables(node.body);
+        const forStmt = node as ForStatement;
+        if (forStmt.init) this.collectUsedVariables(forStmt.init);
+        if (forStmt.test) this.collectUsedVariables(forStmt.test);
+        if (forStmt.update) this.collectUsedVariables(forStmt.update);
+        this.collectUsedVariables(forStmt.body);
         break;
       case NodeType.ReturnStatement:
         if ('argument' in node && node.argument) {
-          this.collectUsedVariables(node.argument);
+          this.collectUsedVariables(node.argument as Expression);
         }
         break;
     }
@@ -260,11 +273,11 @@ export class DeadCodeEliminator {
 
       case NodeType.IfStatement:
         const ifStmt = newNode as IfStatement;
-        ifStmt.test = this.removeDeadCode(ifStmt.test);
+        ifStmt.condition = this.removeDeadCode(ifStmt.condition);
         
         // Optimize constant conditions
-        if (ifStmt.test.type === NodeType.Literal) {
-          const literal = ifStmt.test as Literal;
+        if (ifStmt.condition.type === NodeType.Literal) {
+          const literal = ifStmt.condition as Literal;
           if (literal.value) {
             // Condition is always true, replace with consequent
             return this.removeDeadCode(ifStmt.consequent);
@@ -281,37 +294,58 @@ export class DeadCodeEliminator {
         break;
 
       case NodeType.WhileStatement:
-        if ('test' in newNode) {
-          newNode.test = this.removeDeadCode(newNode.test);
+        const whileStmt = newNode as WhileStatement;
+        whileStmt.condition = this.removeDeadCode(whileStmt.condition) as Expression;
+        // Check for constant false condition
+        if (whileStmt.condition.type === NodeType.Literal) {
+          const literal = whileStmt.condition as Literal;
+          if (!literal.value) {
+            // Loop never executes, remove it
+            return null as any;
+          }
+        }
+        whileStmt.body = this.removeDeadCode(whileStmt.body) as Statement;
+        break;
+
+      case NodeType.ForStatement:
+        const forStmt = newNode as ForStatement;
+        if (forStmt.init) {
+          forStmt.init = this.removeDeadCode(forStmt.init);
+        }
+        if (forStmt.test) {
+          forStmt.test = this.removeDeadCode(forStmt.test);
           // Check for constant false condition
-          if (newNode.test.type === NodeType.Literal) {
-            const literal = newNode.test as Literal;
+          if (forStmt.test.type === NodeType.Literal) {
+            const literal = forStmt.test as Literal;
             if (!literal.value) {
               // Loop never executes, remove it
               return null as any;
             }
           }
         }
-        if ('body' in newNode) {
-          newNode.body = this.removeDeadCode(newNode.body);
+        if (forStmt.update) {
+          forStmt.update = this.removeDeadCode(forStmt.update);
         }
+        forStmt.body = this.removeDeadCode(forStmt.body);
         break;
 
       case NodeType.VariableDeclaration:
+        const varDecl = newNode as VariableDeclaration;
         // Remove unused variable declarations
-        if ('id' in newNode && 'name' in newNode.id && !this.usedVariables.has(newNode.id.name as string)) {
+        if (!this.usedVariables.has(varDecl.identifier.name)) {
           // Variable is not used, but keep if it has side effects in initializer
-          if ('init' in newNode && newNode.init && this.hasSideEffects(newNode.init)) {
+          if (varDecl.initializer && this.hasSideEffects(varDecl.initializer)) {
             // Convert to expression statement
             return {
               type: NodeType.ExpressionStatement,
-              expression: this.removeDeadCode(newNode.init)
+              expression: this.removeDeadCode(varDecl.initializer) as Expression,
+              location: varDecl.location
             } as ASTNode;
           }
           return null as any; // Remove unused variable
         }
-        if ('init' in newNode && newNode.init) {
-          newNode.init = this.removeDeadCode(newNode.init);
+        if (varDecl.initializer) {
+          varDecl.initializer = this.removeDeadCode(varDecl.initializer) as Expression;
         }
         break;
 
@@ -350,28 +384,28 @@ export class DeadCodeEliminator {
   private removeDeadCodeFromChildren(node: ASTNode): void {
     switch (node.type) {
       case NodeType.BinaryExpression:
-        if ('left' in node) node.left = this.removeDeadCode(node.left);
-        if ('right' in node) node.right = this.removeDeadCode(node.right);
+        if ('left' in node) node.left = this.removeDeadCode(node.left as Expression) as Expression;
+        if ('right' in node) node.right = this.removeDeadCode(node.right as Expression) as Expression;
         break;
       case NodeType.UnaryExpression:
-        if ('operand' in node) node.operand = this.removeDeadCode(node.operand);
+        if ('operand' in node) node.operand = this.removeDeadCode(node.operand as Expression) as Expression;
         break;
       case NodeType.ExpressionStatement:
-        if ('expression' in node) node.expression = this.removeDeadCode(node.expression);
+        if ('expression' in node) node.expression = this.removeDeadCode(node.expression as Expression) as Expression;
         break;
       case NodeType.AssignmentExpression:
-        if ('left' in node) node.left = this.removeDeadCode(node.left);
-        if ('right' in node) node.right = this.removeDeadCode(node.right);
+        if ('left' in node) node.left = this.removeDeadCode(node.left as Expression) as Expression;
+        if ('right' in node) node.right = this.removeDeadCode(node.right as Expression) as Expression;
         break;
       case NodeType.CallExpression:
-        if ('callee' in node) node.callee = this.removeDeadCode(node.callee);
+        if ('callee' in node) node.callee = this.removeDeadCode(node.callee as Expression) as Expression;
         if ('arguments' in node && Array.isArray(node.arguments)) {
-          node.arguments = node.arguments.map(arg => this.removeDeadCode(arg)).filter(Boolean);
+          node.arguments = node.arguments.map((arg: Expression) => this.removeDeadCode(arg) as Expression).filter(Boolean);
         }
         break;
       case NodeType.ReturnStatement:
         if ('argument' in node && node.argument) {
-          node.argument = this.removeDeadCode(node.argument);
+          node.argument = this.removeDeadCode(node.argument as Expression) as Expression;
         }
         break;
     }
@@ -388,12 +422,12 @@ export class DeadCodeEliminator {
         return true; // Assignments have side effects
       case NodeType.BinaryExpression:
         if ('left' in node && 'right' in node) {
-          return this.hasSideEffects(node.left) || this.hasSideEffects(node.right);
+          return this.hasSideEffects(node.left as Expression) || this.hasSideEffects(node.right as Expression);
         }
         return false;
       case NodeType.UnaryExpression:
         if ('operand' in node) {
-          return this.hasSideEffects(node.operand);
+          return this.hasSideEffects(node.operand as Expression);
         }
         return false;
       case NodeType.Literal:

@@ -82,6 +82,25 @@ export interface ASTNode {
   location: SourceLocation;
 }
 
+// Node type constants for type checking
+export const NodeType = {
+  Program: 'Program',
+  VariableDeclaration: 'VariableDeclaration',
+  FunctionDeclaration: 'FunctionDeclaration',
+  IfStatement: 'IfStatement',
+  WhileStatement: 'WhileStatement',
+  ReturnStatement: 'ReturnStatement',
+  BlockStatement: 'BlockStatement',
+  ExpressionStatement: 'ExpressionStatement',
+  BinaryExpression: 'BinaryExpression',
+  CallExpression: 'CallExpression',
+  Identifier: 'Identifier',
+  Literal: 'Literal',
+  AssignmentExpression: 'AssignmentExpression',
+  UnaryExpression: 'UnaryExpression',
+  ForStatement: 'ForStatement'
+} as const;
+
 export interface Program extends ASTNode {
   type: 'Program';
   body: Statement[];
@@ -114,6 +133,14 @@ export interface IfStatement extends Statement {
 export interface WhileStatement extends Statement {
   type: 'WhileStatement';
   condition: Expression;
+  body: Statement;
+}
+
+export interface ForStatement extends Statement {
+  type: 'ForStatement';
+  init?: Expression | undefined;
+  test?: Expression | undefined;
+  update?: Expression | undefined;
   body: Statement;
 }
 

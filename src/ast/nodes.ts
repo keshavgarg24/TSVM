@@ -6,6 +6,7 @@ import {
   FunctionDeclaration,
   IfStatement,
   WhileStatement,
+  ForStatement,
   ReturnStatement,
   BlockStatement,
   ExpressionStatement,
@@ -15,7 +16,31 @@ import {
   Literal,
   AssignmentExpression,
   SourceLocation,
-  ASTNode
+  ASTNode,
+  NodeType
+} from '../types';
+
+// Re-export types for convenience
+export {
+  Program,
+  Statement,
+  Expression,
+  VariableDeclaration,
+  FunctionDeclaration,
+  IfStatement,
+  WhileStatement,
+  ForStatement,
+  ReturnStatement,
+  BlockStatement,
+  ExpressionStatement,
+  BinaryExpression,
+  CallExpression,
+  Identifier,
+  Literal,
+  AssignmentExpression,
+  SourceLocation,
+  ASTNode,
+  NodeType
 } from '../types';
 
 // Factory functions for creating AST nodes
@@ -85,6 +110,23 @@ export function createWhileStatement(
   return {
     type: 'WhileStatement',
     condition,
+    body,
+    location
+  };
+}
+
+export function createForStatement(
+  init: Expression | undefined,
+  test: Expression | undefined,
+  update: Expression | undefined,
+  body: Statement,
+  location: SourceLocation
+): ForStatement {
+  return {
+    type: 'ForStatement',
+    init,
+    test,
+    update,
     body,
     location
   };
@@ -194,6 +236,7 @@ export interface ASTVisitor<T> {
   visitFunctionDeclaration(node: FunctionDeclaration): T;
   visitIfStatement(node: IfStatement): T;
   visitWhileStatement(node: WhileStatement): T;
+  visitForStatement(node: ForStatement): T;
   visitReturnStatement(node: ReturnStatement): T;
   visitBlockStatement(node: BlockStatement): T;
   visitExpressionStatement(node: ExpressionStatement): T;
@@ -218,6 +261,8 @@ export abstract class BaseASTVisitor<T> implements ASTVisitor<T> {
         return this.visitIfStatement(node as IfStatement);
       case 'WhileStatement':
         return this.visitWhileStatement(node as WhileStatement);
+      case 'ForStatement':
+        return this.visitForStatement(node as ForStatement);
       case 'ReturnStatement':
         return this.visitReturnStatement(node as ReturnStatement);
       case 'BlockStatement':
@@ -244,6 +289,7 @@ export abstract class BaseASTVisitor<T> implements ASTVisitor<T> {
   abstract visitFunctionDeclaration(node: FunctionDeclaration): T;
   abstract visitIfStatement(node: IfStatement): T;
   abstract visitWhileStatement(node: WhileStatement): T;
+  abstract visitForStatement(node: ForStatement): T;
   abstract visitReturnStatement(node: ReturnStatement): T;
   abstract visitBlockStatement(node: BlockStatement): T;
   abstract visitExpressionStatement(node: ExpressionStatement): T;
@@ -292,6 +338,13 @@ export function getNodeChildren(node: ASTNode): ASTNode[] {
       const whileStmt = node as WhileStatement;
       children.push(whileStmt.condition);
       children.push(whileStmt.body);
+      break;
+    case 'ForStatement':
+      const forStmt = node as ForStatement;
+      if (forStmt.init) children.push(forStmt.init);
+      if (forStmt.test) children.push(forStmt.test);
+      if (forStmt.update) children.push(forStmt.update);
+      children.push(forStmt.body);
       break;
     case 'ReturnStatement':
       const returnStmt = node as ReturnStatement;
